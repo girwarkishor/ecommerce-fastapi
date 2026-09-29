@@ -1,5 +1,28 @@
 # ecommerce-fastapi
 
+Start Valkey with `docker compose up -d valkey`. When FastAPI runs directly in
+the Codespace, it connects using `REDIS_URL=redis://localhost:6379/0` (the
+default). Check the connection at `http://localhost:8000/health/redis` while
+the FastAPI development server is running. If FastAPI is later added as a
+Compose service, use `REDIS_URL=redis://valkey:6379/0` instead.
+
+## Valkey
+
+On Linux, Valkey recommends enabling memory overcommit on the Docker host to
+avoid background-save or replication failures:
+
+```sh
+sudo sysctl -w vm.overcommit_memory=1
+```
+
+To keep the setting across reboots, add `vm.overcommit_memory = 1` to a file
+such as `/etc/sysctl.d/99-valkey.conf` on the host, then apply it with
+`sudo sysctl --system`. This is a host kernel setting and cannot be configured
+from this Compose service.
+
+Valkey's published port is bound to localhost; containers on the Compose
+network can still connect to it using the `valkey` service name.
+
 # 1. Initialize modern non-packaged project
 $ uv init --no-package
 
@@ -31,3 +54,20 @@ uv add --dev pytest pytest-asyncio httpx greenlet
 
 # 4. Run Development Server with Auto-Reload
 uv run fastapi dev app/main.py
+
+You can check Valkey in two ways:
+
+Check the service itself:
+
+
+A healthy service replies PONG.
+
+Check the FastAPI app’s connection:
+
+
+Expect {"status":"ok","service":"valkey"}. Start the app first with uv run fastapi dev app/main.py if it isn’t already running.
+
+For a quick read/write check:
+
+
+The second command should return hello.
