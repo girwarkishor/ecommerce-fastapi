@@ -11,15 +11,18 @@ from app.core.redis import create_redis_client
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     redis_client = create_redis_client()
-    app.state.redis = redis_client
+    app.state.redis = redis_client # Store in FastAPI's state
     try:
-        yield
+        # RUN ON STARTUP (before first request)
+        yield   # Wait for requests to happen
+        # RUN ON SHUTDOWN (after last request)
+
     finally:
-        await redis_client.aclose()
+        await redis_client.aclose() # Clean up on shutdown
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
+    title=settings.PROJECT_NAME,  # Gets value from .env
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
