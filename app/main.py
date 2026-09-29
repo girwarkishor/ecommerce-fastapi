@@ -18,7 +18,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await redis_client.aclose()
 
 
-app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+)
+
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {"status": "online", "project": settings.PROJECT_NAME}
 
 
 @app.get("/health/redis")
@@ -28,6 +39,7 @@ async def redis_health(request: Request) -> dict[str, str]:
     except RedisError as exc:
         raise HTTPException(status_code=503, detail="Valkey is unavailable") from exc
     return {"status": "ok", "service": "valkey"}
+
 
 def main():
     print("Hello from ecommerce-fastapi!")

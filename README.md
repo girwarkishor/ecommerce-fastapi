@@ -1,5 +1,37 @@
 # ecommerce-fastapi
 
+## PostgreSQL
+
+Start PostgreSQL and Valkey from the project directory:
+
+```sh
+docker compose up -d postgres valkey
+```
+
+Wait until PostgreSQL is healthy, then verify it accepts connections:
+
+```sh
+docker compose ps
+docker compose exec postgres pg_isready -U postgres -d ecommerce_db
+```
+
+`pg_isready` should report that the server is accepting connections. To run a
+test query:
+
+```sh
+docker compose exec postgres psql -U postgres -d ecommerce_db -c 'SELECT 1;'
+```
+
+For FastAPI running directly in the Codespace, use
+`postgresql+asyncpg://postgres:postgres_password@localhost:5432/ecommerce_db`.
+This is the default `DATABASE_URL` in the app and `.env.example`. For an app
+running in the same Compose project, use `postgresql+asyncpg://postgres:postgres_password@postgres:5432/ecommerce_db`.
+
+PostgreSQL data is stored in the `postgres_data` Docker volume and remains when
+the container is stopped or recreated. Stop the services with
+`docker compose down`; avoid `docker compose down -v` unless you intend to
+delete the database data.
+
 Start Valkey with `docker compose up -d valkey`. When FastAPI runs directly in
 the Codespace, it connects using `REDIS_URL=redis://localhost:6379/0` (the
 default). Check the connection at `http://localhost:8000/health/redis` while
