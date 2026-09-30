@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum, ForeignKey, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base, TimestampMixin
-from app.models.product import Product
-from app.models.user import User
+
+if TYPE_CHECKING:
+    from app.models.product import Product
+    from app.models.user import User
 
 
 # Inherits from both str AND enum.Enum

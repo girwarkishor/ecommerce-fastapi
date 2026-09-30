@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base, TimestampMixin
-from app.models.order import Order
+
+if TYPE_CHECKING:
+    from app.models.order import Order
 
 
 class UserRole(str, enum.Enum):
