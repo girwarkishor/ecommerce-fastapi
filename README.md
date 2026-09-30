@@ -130,3 +130,94 @@ from this Compose service.
 
 Valkey's published port is bound to localhost; containers on the Compose
 network can still connect to it using the `valkey` service name.
+
+## Database Migrations
+
+### Initialize Alembic
+
+```sh
+uv run alembic init -t async alembic
+```
+
+The command creates the following project structure:
+
+```text
+your-project/
+├── alembic/                    ← NEW FOLDER created
+│   ├── env.py                  ← Main config file (you edit this!)
+│   ├── README                  ← Basic usage instructions
+│   ├── script.py.mako          ← Template for new migration files
+│   └── versions/               ← All your migration files go here
+│       └── (empty for now)
+│
+├── alembic.ini                 ← NEW FILE (Alembic config)
+├── app/
+├── .env
+└── pyproject.toml
+```
+
+One line. One run. Your entire database version control system is set up. 🚀
+
+| Part | What It Does |
+| --- | --- |
+| `uv run` | Runs in your virtual environment |
+| `alembic` | The migration CLI tool |
+| `init` | Initialize migration system (run once!) |
+| `-t async` | Use async-compatible template |
+| `alembic` | Name of the folder to create |
+
+### How Migrations Work
+
+```text
+Your Models          Alembic               Database
+(Python Code)     (Migration Tool)      (Actual Tables)
+     │                   │                    │
+     │ 1. You change     │                    │
+     │    a model        │                    │
+     ├──────────────────►│                    │
+     │                   │ 2. Detect changes  │
+     │                   │    auto-generate   │
+     │                   │    migration file  │
+     │                   │                    │
+     │                   │ 3. Run migration   │
+     │                   ├───────────────────►│
+     │                   │                    │ 4. Table
+     │                   │                    │    updated!
+```
+
+### Generate a Migration
+
+Generate a migration revision script:
+
+```sh
+uv run alembic revision --autogenerate -m "create_initial_ecommerce_tables"
+```
+
+### Apply a Migration
+
+Apply the migration to the database:
+
+```sh
+uv run alembic upgrade head
+```
+
+### Check Migration Status
+
+```sh
+uv run alembic current
+uv run alembic history --verbose
+uv run alembic check
+```
+
+Check the recorded migration revision in PostgreSQL:
+
+```sh
+docker compose exec postgres psql -U postgres -d ecommerce_db \
+  -c "SELECT version_num FROM alembic_version;"
+```
+
+List the database tables:
+
+```sh
+docker compose exec postgres psql -U postgres -d ecommerce_db -c '\dt'
+```
